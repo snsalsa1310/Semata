@@ -5,21 +5,14 @@ import com.example.uaslabpbo.config.UserSession;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -29,24 +22,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 public class AnggaranController {
 
-    //<editor-fold desc="FXML Fields">
-    @FXML private Label namaProfilLabel;
-    @FXML private Button utangButton;
-    @FXML private Button tabunganButton;
-    @FXML private Button profilButton;
-    @FXML private Button keluarButton;
-    @FXML private Label pengeluaranAmount;
-    @FXML private Label pemasukanAmount;
-    @FXML private Label tabunganAmount;
-    @FXML private Label hutangAmount;
-    @FXML private Button tambahCatatanButton;
-    @FXML private VBox pencatatanContainer;
-    @FXML private Button sisaSaldo;
-    //</editor-fold>
+    @FXML
+    private Label pengeluaranAmount;
+    @FXML
+    private Label pemasukanAmount;
+    @FXML
+    private Label tabunganAmount;
+    @FXML
+    private VBox pencatatanContainer;
+    @FXML
+    private Button sisaSaldo;
 
     private final Database databaseService = new Database();
     private final Gson gson = new Gson();
@@ -54,10 +42,6 @@ public class AnggaranController {
 
     @FXML
     public void initialize() {
-        String namaProfil = UserSession.getInstance().getNamaProfil();
-        if (namaProfil != null && !namaProfil.isEmpty()) {
-            namaProfilLabel.setText("Halo, " + namaProfil);
-        }
         loadData();
     }
 
@@ -69,10 +53,12 @@ public class AnggaranController {
         }
 
         new Thread(() -> {
+            // ... (logika load kategori dan transaksi tetap sama)
             String kategoriJson = databaseService.fetchAllKategori(userId);
             kategoriCache = new HashMap<>();
             if (kategoriJson != null) {
-                Type type = new TypeToken<List<Map<String, String>>>(){}.getType();
+                Type type = new TypeToken<List<Map<String, String>>>() {
+                }.getType();
                 List<Map<String, String>> kategoriList = gson.fromJson(kategoriJson, type);
                 for (Map<String, String> kat : kategoriList) {
                     kategoriCache.put(kat.get("id"), kat);
@@ -94,7 +80,8 @@ public class AnggaranController {
     }
 
     private void processTransaksiData(String transaksiJson) {
-        Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
+        Type type = new TypeToken<List<Map<String, Object>>>() {
+        }.getType();
         List<Map<String, Object>> transaksiList = gson.fromJson(transaksiJson, type);
 
         BigDecimal totalPemasukan = BigDecimal.ZERO;
@@ -131,7 +118,6 @@ public class AnggaranController {
         sisaSaldo.setText(formatRupiah.format(saldo));
     }
 
-    //<editor-fold desc="UI Helper Methods">
     private HBox createHeaderRow() {
         HBox header = new HBox(
                 createStyledLabel("Tanggal", 120, true),
@@ -186,30 +172,6 @@ public class AnggaranController {
         label.setPadding(new Insets(5));
         return label;
     }
-    //</editor-fold>
-
-    //<editor-fold desc="Navigation and Alerts">
-    @FXML private void goToHutang(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/hutang.fxml", "Utang"); }
-    @FXML private void goToTabungan(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/tabungan.fxml", "Tabungan"); }
-    @FXML private void goToProfil(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/profil.fxml", "Profil"); }
-    @FXML private void handleKeluar(ActionEvent event) {
-        UserSession.getInstance().cleanUserSession();
-        navigateTo(event, "/com/example/uaslabpbo/hello-view.fxml", "Semata Login");
-    }
-
-    private void navigateTo(ActionEvent event, String fxmlFile, String title) {
-        try {
-            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource(fxmlFile)));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle(title);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Tidak dapat memuat halaman: " + title);
-        }
-    }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
@@ -218,5 +180,4 @@ public class AnggaranController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-    //</editor-fold>
 }
