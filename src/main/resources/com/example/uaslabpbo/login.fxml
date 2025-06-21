@@ -4,18 +4,22 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.uaslabpbo.Login">
-   <children>
-      <ImageView fitHeight="130.0" fitWidth="268.0" layoutX="166.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../img/semata.png" />
-         </image>
-      </ImageView>
-      <Label layoutX="182.0" layoutY="152.0" text="Username" textFill="#3f51b5" />
-      <Button layoutX="237.0" layoutY="285.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="126.0" style="-fx-background-color: #4285F4;" text="Masuk" textFill="WHITE" />
-      <TextField layoutX="182.0" layoutY="170.0" prefHeight="30.0" prefWidth="236.0" promptText="Username" />
-      <PasswordField layoutX="182.0" layoutY="228.0" prefHeight="30.0" prefWidth="236.0" promptText="Password" />
-      <Button layoutX="237.0" layoutY="334.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="126.0" style="-fx-background-color: #90CAF9;" text="Kembali" textFill="#3f51b5" />
-      <Label layoutX="182.0" layoutY="210.0" text="Password" textFill="#3f51b5" />
-   </children>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
+            prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.uaslabpbo.controller.LoginController">
+    <children>
+        <ImageView fitHeight="130.0" fitWidth="268.0" layoutX="166.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@../../../img/semata.png"/>
+            </image>
+        </ImageView>
+        <Label layoutX="182.0" layoutY="152.0" text="Username" textFill="#3f51b5" />
+        <Button layoutX="237.0" layoutY="285.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="126.0"
+                style="-fx-background-color: #4285F4;" text="Masuk" textFill="WHITE" onAction="#handleLogin" fx:id="masukButton" />
+        <TextField layoutX="182.0" layoutY="170.0" prefHeight="30.0" prefWidth="236.0" promptText="Username" fx:id="username"/>
+        <PasswordField layoutX="182.0" layoutY="228.0" prefHeight="30.0" prefWidth="236.0" promptText="Password" fx:id="password"/>
+        <Button layoutX="237.0" layoutY="334.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="126.0"
+                style="-fx-background-color: #90CAF9;" text="Kembali" textFill="#3f51b5" onAction="#back"/>
+        <Label layoutX="182.0" layoutY="210.0" text="Password" textFill="#3f51b5"/>
+    </children>
 </AnchorPane>
