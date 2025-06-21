@@ -5,11 +5,8 @@ import com.example.uaslabpbo.config.UserSession;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -29,38 +26,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 public class TabunganController {
 
-    //<editor-fold desc="FXML Fields">
-    // Sidebar
-    @FXML private Label namaProfilLabel;
-    @FXML private Button utangButton;
-    @FXML private Button tabunganButton;
-    @FXML private Button profilButton;
-    @FXML private Button keluarButton;
-
-    // FXML Fields
-    @FXML private Button anggaranButton;
-    @FXML private Button hutangButton;
-    @FXML private Button nabungButton;
-    @FXML private VBox tabunganListContainer;
-    @FXML private Label totalTabunganLabel;
+    @FXML
+    private Button nabungButton;
+    @FXML
+    private VBox tabunganListContainer;
+    @FXML
+    private Label totalTabunganLabel;
 
     private final Database databaseService = new Database();
     private final Gson gson = new Gson();
     private String tabunganKategoriId;
 
-
     @FXML
     public void initialize() {
-        // Set nama profil pengguna dari sesi
-        String namaProfil = UserSession.getInstance().getNamaProfil();
-        if (namaProfil != null && !namaProfil.isEmpty()) {
-            namaProfilLabel.setText("Halo, " + namaProfil);
-        }
-
         loadData();
     }
 
@@ -82,13 +63,12 @@ public class TabunganController {
             String jsonResponse = databaseService.fetchTransaksiByKategoriId(userId, tabunganKategoriId);
 
             Platform.runLater(() -> {
-                // Bersihkan daftar lama sebelum memuat yang baru
                 tabunganListContainer.getChildren().clear();
-                // Tambahkan header kembali setelah dibersihkan
                 tabunganListContainer.getChildren().add(createHeaderRow());
 
                 if (jsonResponse != null) {
-                    Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
+                    Type type = new TypeToken<List<Map<String, Object>>>() {
+                    }.getType();
                     List<Map<String, Object>> tabunganList = gson.fromJson(jsonResponse, type);
 
                     BigDecimal total = BigDecimal.ZERO;
@@ -99,9 +79,6 @@ public class TabunganController {
 
                     NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
                     totalTabunganLabel.setText(formatRupiah.format(total));
-
-                } else {
-                    // Anda bisa menambahkan label "Data Kosong" di sini jika mau
                 }
             });
         }).start();
@@ -173,32 +150,10 @@ public class TabunganController {
             popupStage.setScene(new Scene(popupRoot));
             popupStage.showAndWait();
 
-            loadData(); // Muat ulang data setelah popup ditutup
+            loadData();
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error", "Gagal membuka form tambah tabungan.");
-        }
-    }
-
-    @FXML private void goToHutang(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/hutang.fxml", "Utang"); }
-    @FXML private void goToTabungan(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/tabungan.fxml", "Tabungan"); }
-    @FXML private void goToProfil(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/profil.fxml", "Profil"); }
-    @FXML private void handleKeluar(ActionEvent event) {
-        UserSession.getInstance().cleanUserSession();
-        navigateTo(event, "/com/example/uaslabpbo/hello-view.fxml", "Semata Login");
-    }
-
-    private void navigateTo(ActionEvent event, String fxmlFile, String title) {
-        try {
-            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource(fxmlFile)));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle(title);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Tidak dapat memuat halaman: " + title);
         }
     }
 
