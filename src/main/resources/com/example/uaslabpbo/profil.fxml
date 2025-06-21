@@ -29,7 +29,7 @@
                 <VBox>
                     <Label style="-fx-font-size: 16px; -fx-text-fill: #555555; -fx-padding: 0 0 5px 0;"
                            text="Nama Pengguna"/>
-                    <TextField prefWidth="300.0"
+                    <TextField fx:id="namaPenggunaField" prefWidth="300.0"
                                style="-fx-background-color: #D1E5F8; -fx-background-radius: 5px; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-text-fill: #333333;"
                                text="Aska Skata"/>
                 </VBox>
@@ -37,7 +37,7 @@
                 <VBox>
                     <Label style="-fx-font-size: 16px; -fx-text-fill: #555555; -fx-padding: 0 0 5px 0;"
                            text="Username"/>
-                    <TextField prefWidth="300.0"
+                    <TextField fx:id="usernameField" prefWidth="300.0"
                                style="-fx-background-color: #D1E5F8; -fx-background-radius: 5px; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-text-fill: #333333;"
                                text="askasiapa123"/>
                 </VBox>
@@ -45,7 +45,7 @@
                 <VBox>
                     <Label style="-fx-font-size: 16px; -fx-text-fill: #555555; -fx-padding: 0 0 5px 0;"
                            text="Password"/>
-                    <PasswordField prefWidth="300.0"
+                    <PasswordField fx:id="passwordField" prefWidth="300.0"
                                    style="-fx-background-color: #D1E5F8; -fx-background-radius: 5px; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-text-fill: #333333;"
                                    text="********"/>
                 </VBox>
@@ -53,7 +53,7 @@
                 <VBox>
                     <Label style="-fx-font-size: 16px; -fx-text-fill: #555555; -fx-padding: 0 0 5px 0;"
                            text="Ubah Password"/>
-                    <PasswordField prefWidth="300.0"
+                    <PasswordField fx:id="ubahPasswordField" prefWidth="300.0"
                                    style="-fx-background-color: #D1E5F8; -fx-background-radius: 5px; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-text-fill: #333333;"
                                    text="********"/>
                 </VBox>
@@ -64,9 +64,9 @@
                         <Insets top="30.0"/>
                     </VBox.margin>
                     <children>
-                        <Button style="-fx-background-color: #D1E5F8; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10px 30px; -fx-background-radius: 8px;"
+                        <Button fx:id="batalButton" onAction="#handleBatalButtonAction" style="-fx-background-color: #D1E5F8; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10px 30px; -fx-background-radius: 8px;"
                                 text="BATAL" textFill="#3f51b5"/>
-                        <Button style="-fx-background-color: #3F51B5; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10px 30px; -fx-background-radius: 8px;"
+                        <Button fx:id="simpanButton" onAction="#handleSimpanButtonAction" style="-fx-background-color: #3F51B5; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10px 30px; -fx-background-radius: 8px;"
                                 text="SIMPAN"/>
                     </children>
                 </HBox>
