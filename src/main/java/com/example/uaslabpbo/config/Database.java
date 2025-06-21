@@ -226,4 +226,21 @@ public class Database {
         }
     }
 
+    public String fetchAllHutang(String userId) {
+        try {
+            // Mengambil semua utang yang belum lunas
+            String uri = SUPABASE_URL + "/rest/v1/utang?id_user=eq." + userId + "&status_lunas=is.false&select=total";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .GET().build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return (response.statusCode() == 200) ? response.body() : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }
