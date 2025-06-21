@@ -33,15 +33,20 @@ import java.util.Objects;
 
 public class TabunganController {
 
+    //<editor-fold desc="FXML Fields">
+    // Sidebar
+    @FXML private Label namaProfilLabel;
+    @FXML private Button utangButton;
+    @FXML private Button tabunganButton;
+    @FXML private Button profilButton;
+    @FXML private Button keluarButton;
+
     // FXML Fields
     @FXML private Button anggaranButton;
     @FXML private Button hutangButton;
-    @FXML private Button profilButton;
-    @FXML private Button keluarButton;
     @FXML private Button nabungButton;
     @FXML private VBox tabunganListContainer;
     @FXML private Label totalTabunganLabel;
-    @FXML private Label namaProfilLabel; // Untuk menampilkan nama user
 
     private final Database databaseService = new Database();
     private final Gson gson = new Gson();
@@ -175,27 +180,11 @@ public class TabunganController {
         }
     }
 
-    // --- [METODE BARU DI SINI] ---
-    // Metode helper yang hilang sebelumnya.
-
-    @FXML
-    private void goToAnggaran(ActionEvent event) {
-        navigateTo(event, "/com/example/uaslabpbo/anggaran.fxml", "Anggaran");
-    }
-
-    @FXML
-    private void goToHutang(ActionEvent event) {
-        navigateTo(event, "/com/example/uaslabpbo/hutang.fxml", "Utang");
-    }
-
-    @FXML
-    private void goToProfil(ActionEvent event) {
-        navigateTo(event, "/com/example/uaslabpbo/profil.fxml", "Profil");
-    }
-
-    @FXML
-    private void handleKeluar(ActionEvent event) {
-        UserSession.getInstance().cleanUserSession(); // Bersihkan sesi saat keluar
+    @FXML private void goToHutang(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/hutang.fxml", "Utang"); }
+    @FXML private void goToTabungan(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/tabungan.fxml", "Tabungan"); }
+    @FXML private void goToProfil(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/profil.fxml", "Profil"); }
+    @FXML private void handleKeluar(ActionEvent event) {
+        UserSession.getInstance().cleanUserSession();
         navigateTo(event, "/com/example/uaslabpbo/hello-view.fxml", "Semata Login");
     }
 

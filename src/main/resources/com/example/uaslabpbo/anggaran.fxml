@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- File: anggaran.fxml (VERSI DIPERBARUI) -->
-<!-- Deskripsi: Menambahkan fx:id dan onAction pada tombol sidebar -->
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -8,11 +6,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.uaslabpbo.controller.AnggaranController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" xmlns="[http://javafx.com/javafx/17.0.12](http://javafx.com/javafx/17.0.12)" xmlns:fx="[http://javafx.com/fxml/1](http://javafx.com/fxml/1)" fx:controller="com.example.uaslabpbo.controller.AnggaranController">
     <left>
         <VBox prefHeight="700.0" prefWidth="200.0" style="-fx-background-color: #4285F4; -fx-padding: 20px 0 20px 0;" BorderPane.alignment="CENTER">
             <children>
-                <!-- [PERUBAHAN] Menambahkan fx:id untuk label nama -->
                 <Label fx:id="namaProfilLabel" text="Halo, nama" textFill="#d1eaff">
                     <font>
                         <Font name="Times New Roman" size="24.0" />
@@ -21,41 +18,33 @@
                         <Insets bottom="30.0" left="20.0" top="20.0" />
                     </VBox.margin>
                 </Label>
-                <!-- Tombol Anggaran (halaman saat ini, tidak perlu aksi) -->
-                <Button mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: #3873D9; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Anggaran">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Button>
-                <!-- [PERUBAHAN] Menambahkan fx:id dan onAction -->
-                <Button fx:id="utangButton" onAction="#goToHutang" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Utang">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Button>
-                <Button fx:id="tabunganButton" onAction="#goToTabungan" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Tabungan">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Button>
-                <Button fx:id="profilButton" onAction="#goToProfil" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Profil">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Button>
+                <Button mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: #3873D9; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Anggaran" />
+                <Button fx:id="utangButton" onAction="#goToHutang" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Utang" />
+                <Button fx:id="tabunganButton" onAction="#goToTabungan" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Tabungan" />
+                <Button fx:id="profilButton" onAction="#goToProfil" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Profil" />
                 <Region VBox.vgrow="ALWAYS" />
-                <Button fx:id="keluarButton" onAction="#handleKeluar" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 18px; -fx-font-weight: bold; -fx-alignment: CENTER; -fx-padding: 10px 20px; -fx-border-color: #d1eaff; -fx-border-width: 1px; -fx-border-radius: 5px;" text="Keluar">
-                    <VBox.margin>
-                        <Insets left="20.0" right="20.0" top="30.0" />
-                    </VBox.margin>
-                </Button>
+                <Button fx:id="keluarButton" onAction="#handleKeluar" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 18px; -fx-font-weight: bold; -fx-alignment: CENTER; -fx-padding: 10px 20px; -fx-border-color: #d1eaff; -fx-border-width: 1px; -fx-border-radius: 5px;" text="Keluar" />
             </children>
         </VBox>
     </left>
     <center>
-        <!-- Konten tengah halaman tidak perlu diubah, jadi saya singkat -->
         <VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-padding: 20px;">
-            <!-- ... semua konten VBox, HBox, Label Anda di sini ... -->
+            <HBox alignment="CENTER_LEFT" style="-fx-padding: 0 0 10px 0;">
+                <Label style="-fx-font-size: 28px; -fx-font-weight: bold;" text="Ringkasan Keuangan" textFill="#3f51b5" />
+            </HBox>
+            <VBox style="-fx-background-color: #ffffff; -fx-padding: 10px; -fx-border-radius: 8px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);">
+                <!-- Ringkasan Atas -->
+            </VBox>
+            <HBox alignment="CENTER_LEFT" style="-fx-padding: 20px 0 10px 0;">
+                <Label style="-fx-font-size: 28px; -fx-font-weight: bold;" text="Pencatatan Keuangan" textFill="#3f51b5" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="tambahCatatanButton" style="-fx-text-fill: white; -fx-background-color: #3F51B5; -fx-font-size: 14px; -fx-padding: 8px 15px; -fx-background-radius: 5px; -fx-font-weight: bold;" text="Tambah Catatan" />
+            </HBox>
+            <VBox fx:id="pencatatanContainer" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1px; -fx-background-radius: 8px;" />
+            <HBox alignment="CENTER_RIGHT" style="-fx-padding: 20px 0 0 0;">
+                <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Sisa Saldo" textFill="#3f51b5" />
+                <Button fx:id="sisaSaldo" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 10px 20px; -fx-background-radius: 25px;" />
+            </HBox>
         </VBox>
     </center>
 </BorderPane>

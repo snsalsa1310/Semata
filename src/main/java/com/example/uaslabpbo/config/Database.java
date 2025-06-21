@@ -193,4 +193,37 @@ public class Database {
         }
     }
 
+    public String fetchAllTransaksi(String userId) {
+        try {
+            String uri = SUPABASE_URL + "/rest/v1/transaksi?id_user=eq." + userId + "&select=*&order=tanggal_transaksi.desc";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .GET().build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return (response.statusCode() == 200) ? response.body() : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String fetchAllKategori(String userId) {
+        try {
+            // Ambil ID, nama, dan tipe untuk digunakan di controller
+            String uri = SUPABASE_URL + "/rest/v1/kategori?id_user=eq." + userId + "&select=id,nama_kategori,tipe";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .GET().build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return (response.statusCode() == 200) ? response.body() : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

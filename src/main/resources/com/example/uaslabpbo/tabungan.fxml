@@ -18,7 +18,7 @@
     <left>
         <VBox prefHeight="700.0" prefWidth="200.0" style="-fx-background-color: #4285F4; -fx-padding: 20px 0 20px 0;" BorderPane.alignment="CENTER">
             <children>
-                <Label fx:id="namaProfilLabel" text="Halo, User" textFill="#d1eaff"> <!-- fx:id ditambahkan untuk personalisasi -->
+                <Label fx:id="namaProfilLabel" text="Halo, nama" textFill="#d1eaff">
                     <font>
                         <Font name="Times New Roman" size="24.0" />
                     </font>
@@ -26,25 +26,30 @@
                         <Insets bottom="30.0" left="20.0" top="20.0" />
                     </VBox.margin>
                 </Label>
-                <!-- Tombol navigasi dihubungkan ke controller -->
-                <Button fx:id="anggaranButton" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Anggaran">
+                <!-- Tombol Anggaran (halaman saat ini), diberi style aktif -->
+                <Button mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: #3873D9; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Anggaran">
                     <VBox.margin>
                         <Insets top="5.0" />
                     </VBox.margin>
                 </Button>
-                <Button fx:id="hutangButton" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Hutang">
+                <!-- Tombol lain dengan fx:id dan onAction -->
+                <Button fx:id="utangButton" onAction="#goToHutang" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Utang">
                     <VBox.margin>
                         <Insets top="5.0" />
                     </VBox.margin>
                 </Button>
-                <Button mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: #3873D9; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Tabungan" />
-                <Button fx:id="profilButton" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Profil">
+                <Button fx:id="tabunganButton" onAction="#goToTabungan" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Tabungan">
+                    <VBox.margin>
+                        <Insets top="5.0" />
+                    </VBox.margin>
+                </Button>
+                <Button fx:id="profilButton" onAction="#goToProfil" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;" text="Profil">
                     <VBox.margin>
                         <Insets top="5.0" />
                     </VBox.margin>
                 </Button>
                 <Region VBox.vgrow="ALWAYS" />
-                <Button fx:id="keluarButton" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 18px; -fx-font-weight: bold; -fx-alignment: CENTER; -fx-padding: 10px 20px; -fx-border-color: #d1eaff; -fx-border-width: 1px; -fx-border-radius: 5px;" text="Keluar">
+                <Button fx:id="keluarButton" onAction="#handleKeluar" mnemonicParsing="false" prefWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 18px; -fx-font-weight: bold; -fx-alignment: CENTER; -fx-padding: 10px 20px; -fx-border-color: #d1eaff; -fx-border-width: 1px; -fx-border-radius: 5px;" text="Keluar">
                     <VBox.margin>
                         <Insets left="20.0" right="20.0" top="30.0" />
                     </VBox.margin>
