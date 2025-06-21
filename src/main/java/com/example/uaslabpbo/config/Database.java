@@ -243,4 +243,52 @@ public class Database {
         }
     }
 
+    /**
+     * Menambahkan data utang baru ke database.
+     * @param utangData Map berisi data utang.
+     * @return true jika berhasil, false jika gagal.
+     */
+    public boolean addUtang(Map<String, Object> utangData) {
+        try {
+            String jsonPayload = gson.toJson(utangData);
+            String uri = SUPABASE_URL + "/rest/v1/utang";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 201;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Mengubah status utang menjadi lunas.
+     * @param utangId ID dari utang yang ingin diupdate.
+     * @return true jika berhasil, false jika gagal.
+     */
+    public boolean markUtangAsPaid(String utangId) {
+        try {
+            String jsonPayload = gson.toJson(Map.of("status_lunas", true));
+            String uri = SUPABASE_URL + "/rest/v1/utang?id=eq." + utangId;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .header("Content-Type", "application/json")
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200 || response.statusCode() == 204;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
