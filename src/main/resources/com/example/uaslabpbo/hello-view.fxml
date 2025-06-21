@@ -5,20 +5,25 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <Button layoutX="205.0" layoutY="194.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="189.0" style="-fx-background-color: #3F51B5;" text="Masuk" textFill="#fff8f8">
-         <font>
-            <Font size="20.0" />
-         </font></Button>
-      <Button layoutX="205.0" layoutY="259.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="189.0" style="-fx-background-color: #3F51B5;" text="Daftar" textFill="#fff9f9">
-         <font>
-            <Font size="20.0" />
-         </font></Button>
-      <ImageView fitHeight="127.0" fitWidth="313.0" layoutX="163.0" layoutY="37.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../img/semata.png" />
-         </image>
-      </ImageView>
-   </children>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
+            prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.uaslabpbo.HelloController">
+    <Button layoutX="205.0" layoutY="194.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="189.0"
+            onAction="#moveToLogin"
+            style="-fx-background-color: #3F51B5;" text="Masuk" textFill="#fff8f8">
+        <font>
+            <Font size="20.0"/>
+        </font>
+    </Button>
+    <Button layoutX="205.0" layoutY="259.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="189.0"
+            onAction="#moveToRegister"
+            style="-fx-background-color: #3F51B5;" text="Daftar" textFill="#fff9f9">
+        <font>
+            <Font size="20.0"/>
+        </font>
+    </Button>
+    <ImageView fitHeight="127.0" fitWidth="313.0" layoutX="163.0" layoutY="37.0" pickOnBounds="true"
+               preserveRatio="true">
+        <Image url="@../../../img/semata.png"/>
+    </ImageView>
 </AnchorPane>

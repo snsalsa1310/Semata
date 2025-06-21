@@ -4,20 +4,26 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.uaslabpbo.Login">
-   <children>
-      <ImageView fitHeight="122.0" fitWidth="265.0" layoutX="168.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../img/semata.png" />
-         </image>
-      </ImageView>
-      <Label layoutX="182.0" layoutY="136.0" text="Nama Pengguna" textFill="#3f51b5" />
-      <TextField layoutX="182.0" layoutY="154.0" prefHeight="30.0" prefWidth="236.0" promptText="Masukkan nama pengguna anda" />
-      <Label layoutX="182.0" layoutY="191.0" text="Username" textFill="#3f51b5" />
-      <Button layoutX="237.0" layoutY="313.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="126.0" style="-fx-background-color: #4285F4;" text="Daftar" textFill="WHITE" />
-      <TextField layoutX="182.0" layoutY="207.0" prefHeight="30.0" prefWidth="236.0" promptText="Masukkan username" />
-      <PasswordField layoutX="182.0" layoutY="262.0" prefHeight="30.0" prefWidth="236.0" promptText="Masukkan password" />
-      <Button layoutX="237.0" layoutY="349.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="126.0" style="-fx-background-color: #90CAF9;" text="Kembali" textFill="#3f51b5" />
-      <Label layoutX="184.0" layoutY="245.0" text="Password" textFill="#3f51b5" />
-   </children>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
+            prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.uaslabpbo.controller.RegisterController">
+    <children>
+        <ImageView fitHeight="122.0" fitWidth="265.0" layoutX="168.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@../../../img/semata.png"/>
+            </image>
+        </ImageView>
+        <Label layoutX="182.0" layoutY="136.0" text="Nama Pengguna" textFill="#3f51b5"/>
+        <TextField layoutX="182.0" layoutY="154.0" prefHeight="30.0" prefWidth="236.0"
+                   promptText="Masukkan nama pengguna anda" fx:id="namaPengguna"/>
+        <Label layoutX="182.0" layoutY="191.0" text="Username" textFill="#3f51b5"/>
+        <Button layoutX="237.0" layoutY="313.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="126.0"
+                style="-fx-background-color: #4285F4;" text="Daftar" textFill="WHITE" fx:id="registerButton" onAction="#handleRegister"/>
+        <TextField layoutX="182.0" layoutY="207.0" prefHeight="30.0" prefWidth="236.0" promptText="Masukkan username" fx:id="username"/>
+        <PasswordField layoutX="182.0" layoutY="262.0" prefHeight="30.0" prefWidth="236.0"
+                       promptText="Masukkan password" fx:id="password"/>
+        <Button layoutX="237.0" layoutY="349.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="126.0"
+                style="-fx-background-color: #90CAF9;" text="Kembali" textFill="#3f51b5" onAction="#back"/>
+        <Label layoutX="184.0" layoutY="245.0" text="Password" textFill="#3f51b5"/>
+    </children>
 </AnchorPane>
