@@ -1,6 +1,7 @@
 package com.example.uaslabpbo.controller;
 
 import com.example.uaslabpbo.config.Database;
+import com.example.uaslabpbo.config.UserSession;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
@@ -60,8 +61,7 @@ public class LoginController {
             return;
         }
 
-        Type type = new TypeToken<List<Map<String, Object>>>() {
-        }.getType();
+        Type type = new TypeToken<List<Map<String, Object>>>() {}.getType();
         List<Map<String, Object>> userList = gson.fromJson(jsonResponse, type);
 
         if (userList.isEmpty()) {
@@ -78,10 +78,19 @@ public class LoginController {
         }
 
         if (BCrypt.checkpw(plainPassword, storedHash)) {
+            // [PENAMBAHAN BARU DI SINI]
+            // Jika login berhasil, simpan informasi user ke dalam session
+            String userId = (String) userData.get("id");
+            String namaProfil = (String) userData.get("nama_profil");
+
+            UserSession.getInstance().setUserId(userId);
+            UserSession.getInstance().setNamaProfil(namaProfil);
+            // [AKHIR PENAMBAHAN]
+
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
             successAlert.setTitle("Login Successful");
             successAlert.setHeaderText(null);
-            successAlert.setContentText("Welcome back!");
+            successAlert.setContentText("Welcome back, " + namaProfil + "!");
             successAlert.showAndWait();
             navigateToDashboard();
 
@@ -89,6 +98,7 @@ public class LoginController {
             showAlert(Alert.AlertType.ERROR, "Login Failed", "The password you entered is incorrect.");
         }
     }
+
 
     private void navigateToDashboard() {
         try {

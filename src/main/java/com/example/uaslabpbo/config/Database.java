@@ -1,13 +1,16 @@
 package com.example.uaslabpbo.config;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 public class Database {
@@ -16,9 +19,9 @@ public class Database {
     private final HttpClient client = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
 
-    public String fetchUserByUsername(String email) {
+    public String fetchUserByUsername(String username) {
         try {
-            String encodedUsername = URLEncoder.encode(email, StandardCharsets.UTF_8);
+            String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
             String uri = SUPABASE_URL + "/rest/v1/users?username=eq." + encodedUsername + "&select=*&limit=1";
 
             HttpRequest request = HttpRequest.newBuilder()
@@ -29,11 +32,7 @@ public class Database {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                return response.body();
-            }
-            return null;
+            return (response.statusCode() == 200) ? response.body() : null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -42,34 +41,156 @@ public class Database {
 
     public boolean registerUser(String namaPengguna, String username, String hashedPassword) {
         try {
-            Map<String, String> userData = Map.of(
+            String jsonPayload = gson.toJson(Map.of(
                     "username", username,
                     "nama_profil", namaPengguna,
                     "password_hash", hashedPassword
-            );
-
-            // Convert the Map to a JSON string
-            String jsonPayload = gson.toJson(userData);
-
+            ));
             String uri = SUPABASE_URL + "/rest/v1/users";
-
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(uri))
                     .header("apikey", SUPABASE_ANON_KEY)
                     .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
                     .header("Content-Type", "application/json")
-                    .header("Prefer", "return=minimal") // We don't need the created object back
+                    .header("Prefer", "return=minimal")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
-
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            // A 201 "Created" status code means success.
             return response.statusCode() == 201;
-
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
+
+    // --- [METODE BARU DI SINI] ---
+
+    /**
+     * Mengambil ID dari sebuah kategori berdasarkan nama (misal: "Tabungan").
+     *
+     * @param userId      ID pengguna yang sedang login.
+     * @param kategoriNama Nama kategori yang ingin dicari.
+     * @return ID kategori dalam bentuk String, atau null jika tidak ditemukan.
+     */
+    public String getKategoriIdByName(String userId, String kategoriNama) {
+        try {
+            String encodedKategori = URLEncoder.encode(kategoriNama, StandardCharsets.UTF_8);
+            // URL untuk mengambil kategori dengan nama tertentu milik user tertentu
+            String uri = SUPABASE_URL + "/rest/v1/kategori?id_user=eq." + userId + "&nama_kategori=eq." + encodedKategori + "&select=id&limit=1";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY) // Harusnya pakai JWT user, tapi kita ikuti pola yang ada
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                Type type = new TypeToken<List<Map<String, String>>>(){}.getType();
+                List<Map<String, String>> resultList = gson.fromJson(response.body(), type);
+                if (!resultList.isEmpty()) {
+                    return resultList.getFirst().get("id");
+                }
+            }
+            return null; // Tidak ditemukan
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Menambahkan transaksi baru (termasuk tabungan) ke database.
+     * @param transaksiData Map berisi data transaksi.
+     * @return true jika berhasil, false jika gagal.
+     */
+    public boolean addTransaksi(Map<String, Object> transaksiData) {
+        try {
+            String jsonPayload = gson.toJson(transaksiData);
+            String uri = SUPABASE_URL + "/rest/v1/transaksi";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 201;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Mengambil semua transaksi untuk kategori tertentu (misal: semua tabungan).
+     * @param userId      ID pengguna yang sedang login.
+     * @param kategoriId  ID dari kategori yang ingin diambil transaksinya.
+     * @return JSON string berisi daftar transaksi, atau null jika gagal.
+     */
+    public String fetchTransaksiByKategoriId(String userId, String kategoriId) {
+        try {
+            String uri = SUPABASE_URL + "/rest/v1/transaksi?id_user=eq." + userId + "&id_kategori=eq." + kategoriId + "&select=*&order=tanggal_transaksi.desc";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return (response.statusCode() == 200) ? response.body() : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public void createDefaultCategories(String userId) {
+        // Daftar kategori default yang akan dibuat
+        List<Map<String, String>> defaultCategories = List.of(
+                Map.of("nama_kategori", "Gaji Pokok", "tipe", "pemasukan"),
+                Map.of("nama_kategori", "Bonus", "tipe", "pemasukan"),
+                Map.of("nama_kategori", "Makan & Minum", "tipe", "pengeluaran"),
+                Map.of("nama_kategori", "Transportasi", "tipe", "pengeluaran"),
+                Map.of("nama_kategori", "Tagihan", "tipe", "pengeluaran"),
+                Map.of("nama_kategori", "Belanja", "tipe", "pengeluaran"),
+                Map.of("nama_kategori", "Lain-lain", "tipe", "pengeluaran"),
+                // Kategori terpenting agar fitur tabungan berfungsi
+                Map.of("nama_kategori", "Tabungan", "tipe", "pengeluaran")
+        );
+
+        // Kirim setiap kategori ke Supabase
+        for (Map<String, String> kategori : defaultCategories) {
+            try {
+                // Buat payload JSON
+                String jsonPayload = gson.toJson(Map.of(
+                        "id_user", userId,
+                        "nama_kategori", kategori.get("nama_kategori"),
+                        "tipe", kategori.get("tipe")
+                ));
+
+                String uri = SUPABASE_URL + "/rest/v1/kategori";
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(uri))
+                        .header("apikey", SUPABASE_ANON_KEY)
+                        .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                        .build();
+
+                // Kirim request secara asynchronous
+                client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+                // Kita tidak perlu menunggu hasilnya (fire and forget)
+
+            } catch (Exception e) {
+                // Jika terjadi error pada satu kategori, lanjutkan ke kategori berikutnya
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
