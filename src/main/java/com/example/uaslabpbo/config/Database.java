@@ -63,15 +63,51 @@ public class Database {
         }
     }
 
-    // --- [METODE BARU DI SINI] ---
+    public String fetchUserById(String userId) {
+        try {
+            // Ambil kolom yang dibutuhkan saja. username, nama_profil, dan password_hash
+            String uri = SUPABASE_URL + "/rest/v1/users?id=eq." + userId + "&select=username,nama_profil,password_hash";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .GET().build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-    /**
-     * Mengambil ID dari sebuah kategori berdasarkan nama (misal: "Tabungan").
-     *
-     * @param userId      ID pengguna yang sedang login.
-     * @param kategoriNama Nama kategori yang ingin dicari.
-     * @return ID kategori dalam bentuk String, atau null jika tidak ditemukan.
-     */
+            // Response akan berupa array JSON, kita ambil elemen pertama
+            if (response.statusCode() == 200 && response.body().startsWith("[")) {
+                Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
+                List<Map<String, Object>> userList = gson.fromJson(response.body(), type);
+                if (!userList.isEmpty()) {
+                    return gson.toJson(userList.get(0)); // Kembalikan objek pertama sebagai JSON
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updateUser(String userId, Map<String, Object> dataToUpdate) {
+        try {
+            String jsonPayload = gson.toJson(dataToUpdate);
+            String uri = SUPABASE_URL + "/rest/v1/users?id=eq." + userId;
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .header("Content-Type", "application/json")
+                    .header("Prefer", "return=minimal") // Tidak perlu response body
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 204; // 204 No Content adalah respons sukses untuk PATCH
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public String getKategoriIdByName(String userId, String kategoriNama) {
         try {
             String encodedKategori = URLEncoder.encode(kategoriNama, StandardCharsets.UTF_8);
@@ -88,7 +124,8 @@ public class Database {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                Type type = new TypeToken<List<Map<String, String>>>(){}.getType();
+                Type type = new TypeToken<List<Map<String, String>>>() {
+                }.getType();
                 List<Map<String, String>> resultList = gson.fromJson(response.body(), type);
                 if (!resultList.isEmpty()) {
                     return resultList.getFirst().get("id");
@@ -101,11 +138,6 @@ public class Database {
         }
     }
 
-    /**
-     * Menambahkan transaksi baru (termasuk tabungan) ke database.
-     * @param transaksiData Map berisi data transaksi.
-     * @return true jika berhasil, false jika gagal.
-     */
     public boolean addTransaksi(Map<String, Object> transaksiData) {
         try {
             String jsonPayload = gson.toJson(transaksiData);
@@ -125,12 +157,6 @@ public class Database {
         }
     }
 
-    /**
-     * Mengambil semua transaksi untuk kategori tertentu (misal: semua tabungan).
-     * @param userId      ID pengguna yang sedang login.
-     * @param kategoriId  ID dari kategori yang ingin diambil transaksinya.
-     * @return JSON string berisi daftar transaksi, atau null jika gagal.
-     */
     public String fetchTransaksiByKategoriId(String userId, String kategoriId) {
         try {
             String uri = SUPABASE_URL + "/rest/v1/transaksi?id_user=eq." + userId + "&id_kategori=eq." + kategoriId + "&select=*&order=tanggal_transaksi.desc";
@@ -149,6 +175,7 @@ public class Database {
             return null;
         }
     }
+
     public void createDefaultCategories(String userId) {
         // Daftar kategori default yang akan dibuat
         List<Map<String, String>> defaultCategories = List.of(
@@ -243,11 +270,6 @@ public class Database {
         }
     }
 
-    /**
-     * Menambahkan data utang baru ke database.
-     * @param utangData Map berisi data utang.
-     * @return true jika berhasil, false jika gagal.
-     */
     public boolean addUtang(Map<String, Object> utangData) {
         try {
             String jsonPayload = gson.toJson(utangData);
@@ -267,16 +289,11 @@ public class Database {
         }
     }
 
-    /**
-     * Mengubah status utang menjadi lunas.
-     * @param utangId ID dari utang yang ingin diupdate.
-     * @return true jika berhasil, false jika gagal.
-     */
     public boolean markUtangAsPaid(String utangId) {
         try {
-            String jsonPayload = gson.toJson(Map.of("status_lunas", true));
+            // Payload untuk mengupdate status menjadi "Lunas"
+            String jsonPayload = "{\"status\": \"Lunas\"}";
             String uri = SUPABASE_URL + "/rest/v1/utang?id=eq." + utangId;
-
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(uri))
                     .header("apikey", SUPABASE_ANON_KEY)
@@ -284,8 +301,9 @@ public class Database {
                     .header("Content-Type", "application/json")
                     .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
+            // Untuk PATCH, status 204 (No Content) atau 200 (OK) menandakan sukses
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200 || response.statusCode() == 204;
+            return response.statusCode() == 204 || response.statusCode() == 200;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

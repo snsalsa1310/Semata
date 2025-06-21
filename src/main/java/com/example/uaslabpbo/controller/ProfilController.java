@@ -1,107 +1,161 @@
 package com.example.uaslabpbo.controller;
 
+import com.example.uaslabpbo.config.Database;
+import com.example.uaslabpbo.config.UserSession;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Button; // Import Button class
+import org.mindrot.jbcrypt.BCrypt;
 
-import java.io.IOException; // Required for potential scene changes or file operations
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProfilController {
 
-    @FXML
-    private TextField namaPenggunaField; // Assuming you'll add fx:id="namaPenggunaField" to your Nama Pengguna TextField
-    @FXML
-    private TextField usernameField; // Assuming you'll add fx:id="usernameField" to your Username TextField
-    @FXML
-    private PasswordField passwordField; // Assuming you'll add fx:id="passwordField" to your Password PasswordField
-    @FXML
-    private PasswordField ubahPasswordField; // Assuming you'll add fx:id="ubahPasswordField" to your Ubah Password PasswordField
-    @FXML
-    private Button simpanButton; // Assuming you'll add fx:id="simpanButton" to your SIMPAN Button
-    @FXML
-    private Button batalButton; // Assuming you'll add fx:id="batalButton" to your BATAL Button
+    @FXML private TextField namaPenggunaField;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private PasswordField ubahPasswordField;
+    @FXML private Button simpanButton;
+    @FXML private Button batalButton;
 
+    private final Database databaseService = new Database();
+    private final Gson gson = new Gson();
+    private String originalNamaProfil; // Untuk menyimpan nama asli saat load
 
-    // Method called when the controller is initialized
+    @FXML
     public void initialize() {
-        // You can pre-populate fields with existing user data here if available
-        // For now, we'll assume the FXML already has default text like "Aska Skata" etc.
-        // namaPenggunaField.setText("Existing Name");
-        // usernameField.setText("Existing Username");
+        // Nonaktifkan field username karena tidak bisa diubah
+        usernameField.setDisable(true);
+        loadUserData();
+    }
+
+    private void loadUserData() {
+        String userId = UserSession.getInstance().getUserId();
+        if (userId == null) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Sesi tidak ditemukan. Silakan login kembali.");
+            return;
+        }
+
+        new Thread(() -> {
+            String userJson = databaseService.fetchUserById(userId);
+            Platform.runLater(() -> {
+                if (userJson != null) {
+                    Type type = new TypeToken<Map<String, String>>(){}.getType();
+                    Map<String, String> userData = gson.fromJson(userJson, type);
+
+                    originalNamaProfil = userData.get("nama_profil");
+                    namaPenggunaField.setText(originalNamaProfil);
+                    usernameField.setText(userData.get("username"));
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Gagal", "Gagal memuat data profil.");
+                }
+            });
+        }).start();
     }
 
     @FXML
     private void handleSimpanButtonAction(ActionEvent event) {
-        // 1. Get data from input fields
-        String namaPengguna = namaPenggunaField.getText();
-        String username = usernameField.getText();
-        String password = passwordField.getText();
-        String ubahPassword = ubahPasswordField.getText();
+        String userId = UserSession.getInstance().getUserId();
+        String namaBaru = namaPenggunaField.getText().trim();
+        String passwordLama = passwordField.getText();
+        String passwordBaru = ubahPasswordField.getText();
 
-        // 2. Perform validation (example: check if passwords match)
-        if (!password.equals(ubahPassword)) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Konfirmasi Password Gagal", "Password dan Ubah Password tidak cocok.");
-            return; // Stop further processing
+        // Validasi 1: Password lama harus diisi untuk otentikasi
+        if (passwordLama.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Otentikasi Gagal", "Silakan masukkan password Anda saat ini untuk menyimpan perubahan.");
+            return;
         }
 
-        // 3. (Conceptual) Save the new data
-        // In a real application, you would interact with a database,
-        // a file, or an API here to persist the data.
-        // For demonstration, we'll just print to console.
-        System.out.println("Data Profil Baru:");
-        System.out.println("Nama Pengguna: " + namaPengguna);
-        System.out.println("Username: " + username);
-        System.out.println("Password (new/updated): " + password); // Be careful with logging passwords in real apps!
+        // Validasi 2: Cek apakah ada perubahan
+        boolean isNamaChanged = !namaBaru.equals(originalNamaProfil);
+        boolean isPasswordChanged = !passwordBaru.isEmpty();
 
-        // 4. Show success pop-up
-        showAlert(Alert.AlertType.INFORMATION, "Sukses", "Data Tersimpan", "Profil Anda berhasil diperbarui.");
+        if (!isNamaChanged && !isPasswordChanged) {
+            showAlert(Alert.AlertType.INFORMATION, "Tidak Ada Perubahan", "Tidak ada data yang diubah.");
+            return;
+        }
 
-        // 5. Optionally, clear fields or navigate to another scene after successful save
-        // clearFields(); // You might want to implement this
+        simpanButton.setDisable(true);
+        simpanButton.setText("Menyimpan...");
+
+        // Proses di background thread
+        new Thread(() -> {
+            // 1. Ambil data user dari DB untuk verifikasi password lama
+            String userJson = databaseService.fetchUserById(userId);
+            if (userJson == null) {
+                Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Error", "Gagal mengambil data user untuk verifikasi."));
+                return;
+            }
+
+            Type type = new TypeToken<Map<String, String>>(){}.getType();
+            Map<String, String> userData = gson.fromJson(userJson, type);
+            String passwordHashFromDb = userData.get("password_hash");
+
+            // 2. Verifikasi password lama
+            if (!BCrypt.checkpw(passwordLama, passwordHashFromDb)) {
+                Platform.runLater(() -> {
+                    showAlert(Alert.AlertType.ERROR, "Otentikasi Gagal", "Password yang Anda masukkan salah.");
+                    simpanButton.setDisable(false);
+                    simpanButton.setText("SIMPAN");
+                });
+                return;
+            }
+
+            // 3. Jika verifikasi berhasil, siapkan data untuk diupdate
+            Map<String, Object> dataToUpdate = new HashMap<>();
+            if (isNamaChanged) {
+                dataToUpdate.put("nama_profil", namaBaru);
+            }
+            if (isPasswordChanged) {
+                String hashedPasswordBaru = BCrypt.hashpw(passwordBaru, BCrypt.gensalt());
+                dataToUpdate.put("password_hash", hashedPasswordBaru);
+            }
+
+            // 4. Kirim update ke database
+            boolean success = databaseService.updateUser(userId, dataToUpdate);
+
+            // 5. Tampilkan hasil ke user
+            Platform.runLater(() -> {
+                if (success) {
+                    showAlert(Alert.AlertType.INFORMATION, "Sukses", "Profil berhasil diperbarui.");
+                    if(isNamaChanged) {
+                        UserSession.getInstance().createSession(userId, namaBaru); // Update nama di sesi
+                    }
+                    // Reset form setelah sukses
+                    passwordField.clear();
+                    ubahPasswordField.clear();
+                    loadUserData(); // Muat ulang data untuk refresh
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Gagal", "Gagal memperbarui profil di database.");
+                }
+                simpanButton.setDisable(false);
+                simpanButton.setText("SIMPAN");
+            });
+        }).start();
     }
 
     @FXML
     private void handleBatalButtonAction(ActionEvent event) {
-        // 1. Show confirmation pop-up for cancellation
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Konfirmasi Batal");
-        alert.setHeaderText("Batalkan Perubahan?");
-        alert.setContentText("Apakah Anda yakin ingin membatalkan perubahan pada profil Anda?");
-
-        // 2. Handle user's choice
-        alert.showAndWait().ifPresent(response -> {
-            if (response == javafx.scene.control.ButtonType.OK) {
-                // User clicked OK (Yes, cancel)
-                showAlert(Alert.AlertType.INFORMATION, "Dibatalkan", "Perubahan Dibatalkan", "Perubahan pada profil telah dibatalkan.");
-                // Optionally, revert fields to original state or navigate back
-                // For now, we'll just clear the password fields and revert others to their initial FXML values.
-                passwordField.clear();
-                ubahPasswordField.clear();
-                // If you fetch initial data in initialize(), you'd re-fetch/reset here.
-            } else {
-                // User clicked Cancel or closed the dialog
-                showAlert(Alert.AlertType.INFORMATION, "Tidak Jadi", "Tidak Dibatalkan", "Anda melanjutkan mengedit profil.");
-            }
-        });
-    }
-
-    // Helper method to show an alert dialog
-    private void showAlert(Alert.AlertType alertType, String title, String header, String content) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
-    // Optional: Method to clear all input fields
-    private void clearFields() {
-        namaPenggunaField.clear();
-        usernameField.clear();
+        // Kembalikan field nama ke nilai semula dan bersihkan field password
+        namaPenggunaField.setText(originalNamaProfil);
         passwordField.clear();
         ubahPasswordField.clear();
+        showAlert(Alert.AlertType.INFORMATION, "Dibatalkan", "Perubahan telah dibatalkan.");
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String content) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

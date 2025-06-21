@@ -18,5 +18,7 @@ module com.example.uaslabpbo {
 
     opens com.example.uaslabpbo to javafx.graphics;
     opens com.example.uaslabpbo.controller to javafx.fxml;
+    opens com.example.uaslabpbo.model to javafx.base;
+    exports com.example.uaslabpbo.model;
     exports com.example.uaslabpbo;
 }

@@ -22,28 +22,40 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HutangController {
 
-    //<editor-fold desc="FXML Fields">
-    @FXML private SidebarController sidebarController; // Injeksi dari FXML
-    @FXML private Button tambahUtangButton;
-    @FXML private TableView<UtangModel> utangTable;
-    @FXML private TableColumn<UtangModel, String> keteranganColumn;
-    @FXML private TableColumn<UtangModel, String> jumlahColumn;
-    @FXML private TableColumn<UtangModel, String> jatuhTempoColumn;
-    @FXML private TableColumn<UtangModel, String> statusLunasColumn;
-    @FXML private TableColumn<UtangModel, String> waktuDibuatColumn;
-    @FXML private TableColumn<UtangModel, Void> aksiColumn;
-    //</editor-fold>
+    @FXML
+    private Button tambahUtangButton;
+    @FXML
+    private TableView<UtangModel> utangTable;
+    @FXML
+    private TableColumn<UtangModel, String> keteranganColumn;
+    @FXML
+    private TableColumn<UtangModel, String> jumlahColumn;
+    @FXML
+    private TableColumn<UtangModel, String> jatuhTempoColumn;
+    @FXML
+    private TableColumn<UtangModel, String> statusLunasColumn;
+    @FXML
+    private TableColumn<UtangModel, String> waktuDibuatColumn;
+    @FXML
+    private TableColumn<UtangModel, Void> aksiColumn;
 
     private final Database databaseService = new Database();
     private final Gson gson = new Gson();
     private ObservableList<UtangModel> utangList = FXCollections.observableArrayList();
+
+    // [PERBAIKAN 1] Menambahkan metode initialize
+    @FXML
+    public void initialize() {
+        setupTableColumns();
+        loadUtangData();
+    }
 
     private void setupTableColumns() {
         keteranganColumn.setCellValueFactory(new PropertyValueFactory<>("keterangan"));
@@ -54,8 +66,10 @@ public class HutangController {
 
         aksiColumn.setCellFactory(param -> new TableCell<>() {
             private final Button btnLunas = new Button("Tandai Lunas");
+
             {
-                btnLunas.getStyleClass().add("button-lunas"); // Tambahkan style class jika perlu
+                // Styling opsional untuk tombol
+                btnLunas.setStyle("-fx-background-color: #28a745; -fx-text-fill: white;");
                 btnLunas.setOnAction(event -> {
                     UtangModel utang = getTableView().getItems().get(getIndex());
                     handleTandaiLunas(utang.getId());
@@ -65,11 +79,11 @@ public class HutangController {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                     setGraphic(null);
                 } else {
-                    UtangModel utang = getTableView().getItems().get(getIndex());
-                    if ("Belum Lunas".equals(utang.statusProperty().get())) {
+                    // Hanya tampilkan tombol jika status "Belum Lunas"
+                    if ("Belum Lunas".equals(getTableRow().getItem().statusProperty().get())) {
                         setGraphic(btnLunas);
                         setAlignment(Pos.CENTER);
                     } else {
@@ -89,28 +103,29 @@ public class HutangController {
 
         new Thread(() -> {
             String jsonResponse = databaseService.fetchAllHutang(userId);
-            if (jsonResponse != null) {
-                Type type = new TypeToken<List<Map<String, Object>>>() {}.getType();
+            if (jsonResponse != null && !jsonResponse.isEmpty()) {
+                Type type = new TypeToken<List<Map<String, Object>>>() {
+                }.getType();
                 List<Map<String, Object>> resultList = gson.fromJson(jsonResponse, type);
 
                 List<UtangModel> tempList = resultList.stream()
                         .map(this::mapToUtangModel)
+                        .filter(Objects::nonNull) // Filter objek null jika terjadi error parsing
                         .collect(Collectors.toList());
 
-                utangList = FXCollections.observableArrayList(tempList);
-
-                Platform.runLater(() -> utangTable.setItems(utangList));
+                utangList.setAll(tempList); // Gunakan setAll untuk update efisien
             } else {
-                Platform.runLater(() -> utangTable.setItems(FXCollections.observableArrayList())); // Kosongkan tabel jika tidak ada data
+                utangList.clear(); // Kosongkan jika tidak ada data atau response null
             }
+            Platform.runLater(() -> utangTable.setItems(utangList));
         }).start();
     }
 
-    // [PERUBAHAN UTAMA DI SINI] Logika parsing dibuat lebih aman
     private UtangModel mapToUtangModel(Map<String, Object> map) {
         try {
             String id = (String) map.get("id");
-            String keterangan = (String) map.getOrDefault("nama_utang", "N/A");
+            String keterangan = (String) map.getOrDefault("nama_utang", "Tidak ada keterangan");
+            String status = (String) map.getOrDefault("status", "Belum Lunas");
 
             BigDecimal jumlah = BigDecimal.ZERO;
             if (map.get("total") != null) {
@@ -118,29 +133,21 @@ public class HutangController {
             }
 
             LocalDate jatuhTempo = null;
-            if (map.get("jatuh_tempo_pembayaran_berikutnya") != null) {
-                jatuhTempo = LocalDate.parse(map.get("jatuh_tempo_pembayaran_berikutnya").toString());
-            }
-
-            boolean statusLunas = false;
-            Object statusObj = map.get("status_lunas");
-            if (statusObj instanceof Boolean) {
-                statusLunas = (Boolean) statusObj;
+            if (map.get("jatuh_tempo_pembayaran_berikutnya") instanceof String) {
+                jatuhTempo = LocalDate.parse(((String) map.get("jatuh_tempo_pembayaran_berikutnya")));
             }
 
             LocalDate dibuatPada = null;
-            Object dibuatObj = map.get("waktu_dibuat");
-            if (dibuatObj != null) {
-                // Mengambil hanya bagian tanggal dari timestamp
-                dibuatPada = LocalDate.parse(dibuatObj.toString().substring(0, 10));
+            if (map.get("waktu_dibuat") instanceof String) {
+                dibuatPada = LocalDate.parse(((String) map.get("waktu_dibuat")).substring(0, 10));
             }
 
-            return new UtangModel(id, keterangan, jumlah, jatuhTempo, statusLunas, dibuatPada);
+            return new UtangModel(id, keterangan, jumlah, jatuhTempo, status, dibuatPada);
 
         } catch (Exception e) {
             System.err.println("Error parsing utang data: " + map.toString());
             e.printStackTrace();
-            return null; // Mengembalikan null jika ada error, akan difilter nanti
+            return null;
         }
     }
 
@@ -155,9 +162,10 @@ public class HutangController {
             popupStage.setTitle("Tambah Utang Baru");
             popupStage.setScene(new Scene(popupRoot));
             popupStage.showAndWait();
-            loadUtangData(); // Muat ulang data setelah popup ditutup
+            loadUtangData();
         } catch (IOException e) {
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Gagal membuka form tambah utang.");
         }
     }
 
@@ -167,13 +175,19 @@ public class HutangController {
             Platform.runLater(() -> {
                 if (success) {
                     loadUtangData(); // Refresh tabel
+                    showAlert(Alert.AlertType.INFORMATION, "Sukses", "Status utang berhasil diperbarui.");
                 } else {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Gagal");
-                    alert.setContentText("Gagal memperbarui status utang di database.");
-                    alert.showAndWait();
+                    showAlert(Alert.AlertType.ERROR, "Gagal", "Gagal memperbarui status utang di database.");
                 }
             });
         }).start();
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

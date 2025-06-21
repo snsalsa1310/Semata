@@ -12,17 +12,19 @@ public class UserSession {
     private String namaProfil;
 
     // Constructor dibuat private agar tidak bisa dibuat instance baru dari luar
-    private UserSession() {}
+    private UserSession() {
+    }
 
-    /**
-     * Metode untuk mendapatkan satu-satunya instance dari UserSession.
-     * @return Instance UserSession.
-     */
     public static synchronized UserSession getInstance() {
         if (instance == null) {
             instance = new UserSession();
         }
         return instance;
+    }
+
+    public void createSession(String userId, String namaProfil) {
+        this.userId = userId;
+        this.namaProfil = namaProfil;
     }
 
     // Getter dan Setter untuk userId
@@ -43,9 +45,6 @@ public class UserSession {
         this.namaProfil = namaProfil;
     }
 
-    /**
-     * Membersihkan data sesi, biasanya dipanggil saat logout.
-     */
     public void cleanUserSession() {
         userId = null;
         namaProfil = null;
