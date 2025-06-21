@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semata API Tester</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; margin: 2em; background-color: #f8f9fa; color: #212529; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 2em; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1, h2 { color: #007bff; border-bottom: 2px solid #dee2e6; padding-bottom: 0.5em; }
+        .feature-box { border: 1px solid #e9ecef; border-radius: 8px; padding: 1.5em; margin-bottom: 2em; }
+        label { display: block; font-weight: bold; margin-top: 1em; }
+        input[type="text"], input[type="password"] { width: calc(100% - 20px); padding: 10px; margin-top: 0.5em; border: 1px solid #ced4da; border-radius: 4px; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 1em; font-size: 1em; }
+        button:hover { background-color: #0056b3; }
+        pre { background-color: #e9ecef; padding: 1em; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; font-family: "Courier New", Courier, monospace; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>&#128296; Semata API Tester</h1>
+    <p>Gunakan halaman ini untuk menguji endpoint backend yang berjalan di <strong>http://localhost:7070</strong>.</p>
+
+    <!-- Bagian Register -->
+    <div class="feature-box">
+        <h2>1. Register User</h2>
+        <form id="registerForm">
+            <label for="regUsername">Username:</label>
+            <input type="text" id="regUsername" value="clara" required>
+
+            <label for="regNamaProfil">Nama Profil:</label>
+            <input type="text" id="regNamaProfil" value="Clara Angelin" required>
+
+            <label for="regPassword">Password:</label>
+            <input type="password" id="regPassword" value="password123" required>
+
+            <button type="submit">Register</button>
+        </form>
+        <h3>Hasil Register:</h3>
+        <pre id="registerResult"></pre>
+    </div>
+
+    <!-- Bagian Login -->
+    <div class="feature-box">
+        <h2>2. Login User</h2>
+        <form id="loginForm">
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" value="clara" required>
+
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" value="password123" required>
+
+            <button type="submit">Login</button>
+        </form>
+        <h3>Hasil Login (JWT Token):</h3>
+        <pre id="loginResult"></pre>
+    </div>
+
+    <!-- Bagian Test Protected Endpoint -->
+    <div class="feature-box">
+        <h2>3. Uji Endpoint Terproteksi</h2>
+        <p>Salin token dari hasil login di atas dan tempel di sini.</p>
+        <label for="jwtToken">JWT Token:</label>
+        <input type="text" id="jwtToken" placeholder="Tempel token di sini...">
+        <button id="testProtected">Test /api/protected-data</button>
+        <h3>Hasil Uji:</h3>
+        <pre id="protectedResult"></pre>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:7070';
+
+    // Fungsi untuk menampilkan hasil
+    function displayResult(elementId, data, isError = false) {
+        const el = document.getElementById(elementId);
+        el.textContent = JSON.stringify(data, null, 2);
+        el.className = isError ? 'error' : 'success';
+    }
+
+    // Handler untuk form Register
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('regUsername').value;
+        const nama_profil = document.getElementById('regNamaProfil').value;
+        const password = document.getElementById('regPassword').value;
+
+        try {
+            const response = await fetch(${API_BASE_URL}/api/register, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, nama_profil, password })
+            });
+            const data = await response.json();
+            if (!response.ok) throw data;
+            displayResult('registerResult', data);
+        } catch (error) {
+            displayResult('registerResult', error, true);
+        }
+    });
+
+    // Handler untuk form Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            const response = await fetch(${API_BASE_URL}/api/login, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            if (!response.ok) throw data;
+            displayResult('loginResult', data);
+            // Otomatis salin token ke form pengujian
+            document.getElementById('jwtToken').value = data.token;
+        } catch (error) {
+            displayResult('loginResult', error, true);
+        }
+    });
+
+    // Handler untuk tombol Uji Endpoint Terproteksi
+    document.getElementById('testProtected').addEventListener('click', async () => {
+        const token = document.getElementById('jwtToken').value;
+        if (!token) {
+            displayResult('protectedResult', { error: 'Token tidak boleh kosong!' }, true);
+            return;
+        }
+
+        try {
+            const response = await fetch(${API_BASE_URL}/api/protected-data, {
+                method: 'GET',
+                headers: { 'Authorization': Bearer ${token} }
+            });
+            const data = await response.json();
+             if (!response.ok) throw data;
+            displayResult('protectedResult', data);
+        } catch (error) {
+            displayResult('protectedResult', error, true);
+        }
+    });
+
+</script>
+</body>
+</html>
