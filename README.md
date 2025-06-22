@@ -9,11 +9,11 @@
 - **📌 Pencatatan Transaksi**
   - Mencatat pemasukan dan pengeluaran harian berdasarkan kategori seperti makanan, transportasi, hiburan, dll.
 
-- **📊 Analisis dan Pelaporan**
-  - Menyediakan grafik dan laporan keuangan harian, mingguan, dan bulanan untuk membantu pengguna memahami kondisi finansial mereka.
+- **📊 Ringkasan pelaporan**
+  - Menyediakan ringkasan keuangan untuk membantu pengguna memahami kondisi finansial mereka.
 
 - **📅 Perencanaan Anggaran**
-  - Menetapkan anggaran bulanan untuk setiap kategori, dengan peringatan jika pengeluaran mendekati atau melebihi batas.
+  - Menetapkan anggaran bulanan untuk setiap kategori sehingga pengguna mengetahui pengeluaran tiap kategori.
 
 - **🎯 Target Tabungan**
   - Menentukan tujuan tabungan (misalnya liburan atau DP rumah) dan memantau progresnya secara otomatis.
@@ -21,15 +21,22 @@
 - **📘 Manajemen Utang dan Pinjaman**
   - Mencatat utang/cicilan dan pinjaman yang diberikan, serta mengingatkan jatuh tempo pembayaran.
 
-- **🎨 Tema Dinamis**
-  - Mengubah tampilan aplikasi sesuai kondisi keuangan: hijau (stabil), kuning (waspada), merah (darurat).
-
 - **🔐 Keamanan Data**
   - Setiap pengguna memiliki akun pribadi dengan proteksi kata sandi untuk menjaga privasi dan keamanan data finansial.
 
 ---
 
+## 📚 Dependencies yang digunakan
+1. **JavaFX**: untuk antarmuka aplikasi semata
+2. **Java HTTP Client** dan **Gson**: Menghubungkan aplikasi ke database dan mengolah data
+3. **jBcrypt**: Hashing password sebelum disimpan
+
+---
+
 ## 📥 Instalasi (Menjalankan aplikasi)
+1. Download zip program semata lalu ekstrak atau clone repository ini dan jalankan pada software IDE yang anda gunakan (IntelliJ IDEA, Eclipse, Netbeans, dll).
+2. Buka file bernama "HelloApplication.java" yang terletak pada /src/java/main/com.example.uaslabpbo/HelloApplication.java
+3. Jalankan program melalui "HelloApplication.java" (Gunakan shortcut Shift + F10 jika anda menggunakan Intellij IDEA).
 
 ## 🔗 Link Video Youtube : 
 
