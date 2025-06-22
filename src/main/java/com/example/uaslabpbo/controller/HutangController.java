@@ -127,8 +127,7 @@ public class HutangController {
     private UtangModel mapToUtangModel(Map<String, Object> map) {
         try {
             String id = (String) map.get("id");
-            String keterangan = (String) map.getOrDefault("nama_utang", "Tidak ada keterangan");
-            String status = (String) map.getOrDefault("status", "Belum Lunas");
+            String keterangan = (String) map.getOrDefault("nama_utang", "N/A");
 
             BigDecimal jumlah = BigDecimal.ZERO;
             if (map.get("total") != null) {
@@ -137,15 +136,22 @@ public class HutangController {
 
             LocalDate jatuhTempo = null;
             if (map.get("jatuh_tempo_pembayaran_berikutnya") instanceof String) {
-                jatuhTempo = LocalDate.parse(((String) map.get("jatuh_tempo_pembayaran_berikutnya")));
+                jatuhTempo = LocalDate.parse((String) map.get("jatuh_tempo_pembayaran_berikutnya"));
             }
 
             LocalDate dibuatPada = null;
-            if (map.get("waktu_dibuat") instanceof String) {
-                dibuatPada = LocalDate.parse(((String) map.get("waktu_dibuat")).substring(0, 10));
+            Object dibuatObj = map.get("waktu_dibuat");
+            if (dibuatObj instanceof String) {
+                dibuatPada = LocalDate.parse(((String) dibuatObj).substring(0, 10));
             }
 
-            return new UtangModel(id, keterangan, jumlah, jatuhTempo, status, dibuatPada);
+            boolean statusLunas = false;
+            Object statusObj = map.get("status_lunas");
+            if (statusObj instanceof Boolean) {
+                statusLunas = (Boolean) statusObj;
+            }
+
+            return new UtangModel(id, keterangan, jumlah, jatuhTempo, statusLunas, dibuatPada);
 
         } catch (Exception e) {
             System.err.println("Error parsing utang data: " + map.toString());

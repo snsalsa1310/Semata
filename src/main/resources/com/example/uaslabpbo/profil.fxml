@@ -31,7 +31,7 @@
                            text="Nama Pengguna"/>
                     <TextField fx:id="namaPenggunaField" prefWidth="300.0"
                                style="-fx-background-color: #D1E5F8; -fx-background-radius: 5px; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-text-fill: #333333;"
-                               text="Aska Skata"/>
+                               text="Memuat data..."/>
                 </VBox>
 
                 <VBox>
@@ -39,7 +39,7 @@
                            text="Username"/>
                     <TextField fx:id="usernameField" prefWidth="300.0"
                                style="-fx-background-color: #D1E5F8; -fx-background-radius: 5px; -fx-padding: 10px 15px; -fx-font-size: 14px; -fx-text-fill: #333333;"
-                               text="askasiapa123"/>
+                               text="Memuat data..."/>
                 </VBox>
 
                 <VBox>

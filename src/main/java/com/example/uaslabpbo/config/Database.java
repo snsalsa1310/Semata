@@ -507,8 +507,7 @@ public class Database {
 
     public String fetchAllHutang(String userId) {
         try {
-            // Mengambil semua utang yang belum lunas
-            String uri = SUPABASE_URL + "/rest/v1/utang?id_user=eq." + userId + "&status_lunas=is.false&select=total";
+            String uri = SUPABASE_URL + "/rest/v1/utang?id_user=eq." + userId + "&select=*&order=waktu_dibuat.desc";
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(uri))
                     .header("apikey", SUPABASE_ANON_KEY)
@@ -541,21 +540,28 @@ public class Database {
         }
     }
 
+    /**
+     * Mengubah status utang menjadi lunas.
+     * @param utangId ID dari utang yang ingin diupdate.
+     * @return true jika berhasil, false jika gagal.
+     */
     public boolean markUtangAsPaid(String utangId) {
         try {
-            // Payload untuk mengupdate status menjadi "Lunas"
-            String jsonPayload = "{\"status\": \"Lunas\"}";
+            String jsonPayload = gson.toJson(Map.of("status_lunas", true));
             String uri = SUPABASE_URL + "/rest/v1/utang?id=eq." + utangId;
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(uri))
                     .header("apikey", SUPABASE_ANON_KEY)
                     .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
                     .header("Content-Type", "application/json")
+                    .header("Prefer", "return=minimal")
                     .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
-            // Untuk PATCH, status 204 (No Content) atau 200 (OK) menandakan sukses
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 204 || response.statusCode() == 200;
+            return response.statusCode() == 204;
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;

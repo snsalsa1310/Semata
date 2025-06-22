@@ -1,6 +1,7 @@
 package com.example.uaslabpbo.model;
 
-import javafx.beans.property.*;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -11,51 +12,28 @@ import java.util.Locale;
 public class UtangModel {
     private final StringProperty id;
     private final StringProperty keterangan;
-    private final ObjectProperty<BigDecimal> jumlah;
-    private final ObjectProperty<LocalDate> jatuhTempo;
+    private final StringProperty jumlah;
+    private final StringProperty jatuhTempo;
     private final StringProperty status;
-    private final ObjectProperty<LocalDate> dibuatPada;
+    private final StringProperty dibuatPada;
 
-    public UtangModel(String id, String keterangan, BigDecimal jumlah, LocalDate jatuhTempo, String status, LocalDate dibuatPada) {
+    public UtangModel(String id, String keterangan, BigDecimal jumlah, LocalDate jatuhTempo, boolean statusLunas, LocalDate dibuatPada) {
+        NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+
         this.id = new SimpleStringProperty(id);
         this.keterangan = new SimpleStringProperty(keterangan);
-        this.jumlah = new SimpleObjectProperty<>(jumlah);
-        this.jatuhTempo = new SimpleObjectProperty<>(jatuhTempo);
-        this.status = new SimpleStringProperty(status);
-        this.dibuatPada = new SimpleObjectProperty<>(dibuatPada);
+        this.jumlah = new SimpleStringProperty(formatRupiah.format(jumlah));
+        this.jatuhTempo = new SimpleStringProperty(jatuhTempo != null ? jatuhTempo.format(dateFormat) : "N/A");
+        this.status = new SimpleStringProperty(statusLunas ? "Lunas" : "Belum Lunas");
+        this.dibuatPada = new SimpleStringProperty(dibuatPada != null ? dibuatPada.format(dateFormat) : "N/A");
     }
 
-    // Property Getters (dibutuhkan oleh PropertyValueFactory)
-    public StringProperty idProperty() {
-        return id;
-    }
-
-    public StringProperty keteranganProperty() {
-        return keterangan;
-    }
-
-    public StringProperty jumlahProperty() {
-        // Format jumlah menjadi Rupiah untuk ditampilkan di tabel
-        NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
-        return new SimpleStringProperty(formatRupiah.format(jumlah.get()));
-    }
-
-    public StringProperty jatuhTempoProperty() {
-        if (jatuhTempo.get() == null) return new SimpleStringProperty("-");
-        return new SimpleStringProperty(jatuhTempo.get().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
-    }
-
-    public StringProperty statusProperty() {
-        return status;
-    }
-
-    public StringProperty dibuatPadaProperty() {
-        if (dibuatPada.get() == null) return new SimpleStringProperty("-");
-        return new SimpleStringProperty(dibuatPada.get().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
-    }
-
-    // Standard Getter
-    public String getId() {
-        return id.get();
-    }
+    // Getters
+    public String getId() { return id.get(); }
+    public StringProperty keteranganProperty() { return keterangan; }
+    public StringProperty jumlahProperty() { return jumlah; }
+    public StringProperty jatuhTempoProperty() { return jatuhTempo; }
+    public StringProperty statusProperty() { return status; }
+    public StringProperty dibuatPadaProperty() { return dibuatPada; }
 }
