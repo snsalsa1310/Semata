@@ -120,7 +120,9 @@ public class ProfilController {
             }
 
             // 4. Kirim update ke database
+            System.out.println("Data yang akan diupdate: " + dataToUpdate);
             boolean success = databaseService.updateUser(userId, dataToUpdate);
+            System.out.println("Status update: " + success);
 
             // 5. Tampilkan hasil ke user
             Platform.runLater(() -> {
@@ -128,11 +130,34 @@ public class ProfilController {
                     showAlert(Alert.AlertType.INFORMATION, "Sukses", "Profil berhasil diperbarui.");
                     if(isNamaChanged) {
                         UserSession.getInstance().createSession(userId, namaBaru); // Update nama di sesi
+                        originalNamaProfil = namaBaru; // Update originalNamaProfil
+                        System.out.println("Nama berhasil diubah ke: " + namaBaru);
                     }
                     // Reset form setelah sukses
                     passwordField.clear();
                     ubahPasswordField.clear();
-                    loadUserData(); // Muat ulang data untuk refresh
+
+                    // Tunggu sebentar lalu refresh data dari database
+                    new Thread(() -> {
+                        try {
+                            Thread.sleep(1000); // Tunggu 1 detik
+                            String updatedUserJson = databaseService.fetchUserById(userId);
+                            if (updatedUserJson != null) {
+                                Type refreshType = new TypeToken<Map<String, String>>(){}.getType();
+                                Map<String, String> refreshedData = gson.fromJson(updatedUserJson, refreshType);
+                                Platform.runLater(() -> {
+                                    String refreshedNama = refreshedData.get("nama_profil");
+                                    System.out.println("Data terbaru dari DB: " + refreshedNama);
+                                    if (refreshedNama != null) {
+                                        namaPenggunaField.setText(refreshedNama);
+                                        originalNamaProfil = refreshedNama;
+                                    }
+                                });
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
                 } else {
                     showAlert(Alert.AlertType.ERROR, "Gagal", "Gagal memperbarui profil di database.");
                 }

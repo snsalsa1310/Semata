@@ -12,10 +12,12 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 public class Database {
     private static final String SUPABASE_URL = "https://dksolqgiyrkdboxwkmjd.supabase.co";
     private static final String SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrc29scWdpeXJrZGJveHdrbWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0ODgxODYsImV4cCI6MjA2NjA2NDE4Nn0.l9h2Eul46YeaisuzjHzPhig2hiad1cggnfhh_7BOSHo";
+    private static final String SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrc29scWdpeXJrZGJveHdrbWpkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQ4ODE4NiwiZXhwIjoyMDY2MDY0MTg2fQ.zBKvtDK3ErPV7idR26qqXjQ0zpM5o5JGtNWdwF-NA_A";
     private final HttpClient client = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
 
@@ -63,49 +65,299 @@ public class Database {
         }
     }
 
-    public String fetchUserById(String userId) {
-        try {
-            // Ambil kolom yang dibutuhkan saja. username, nama_profil, dan password_hash
-            String uri = SUPABASE_URL + "/rest/v1/users?id=eq." + userId + "&select=username,nama_profil,password_hash";
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(uri))
-                    .header("apikey", SUPABASE_ANON_KEY)
-                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
-                    .GET().build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            // Response akan berupa array JSON, kita ambil elemen pertama
-            if (response.statusCode() == 200 && response.body().startsWith("[")) {
-                Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
-                List<Map<String, Object>> userList = gson.fromJson(response.body(), type);
-                if (!userList.isEmpty()) {
-                    return gson.toJson(userList.get(0)); // Kembalikan objek pertama sebagai JSON
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public boolean updateUser(String userId, Map<String, Object> dataToUpdate) {
         try {
+            if (userId == null || userId.trim().isEmpty()) {
+                System.err.println("Invalid user ID provided");
+                return false;
+            }
+
+            if (dataToUpdate == null || dataToUpdate.isEmpty()) {
+                System.err.println("No data to update");
+                return false;
+            }
+
             String jsonPayload = gson.toJson(dataToUpdate);
+            System.out.println("Update payload: " + jsonPayload);
+            System.out.println("User ID: " + userId);
+
             String uri = SUPABASE_URL + "/rest/v1/users?id=eq." + userId;
+            System.out.println("Update URI: " + uri);
+
+            // Try with return=representation to see what actually gets updated
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(uri))
-                    .header("apikey", SUPABASE_ANON_KEY)
-                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .header("apikey", SUPABASE_SERVICE_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_SERVICE_KEY)
                     .header("Content-Type", "application/json")
-                    .header("Prefer", "return=minimal") // Tidak perlu response body
+                    .header("Prefer", "return=representation") // Changed from minimal to see the result
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    .header("Pragma", "no-cache")
+                    .header("Expires", "0")
                     .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 204; // 204 No Content adalah respons sukses untuk PATCH
+
+            System.out.println("Response status: " + response.statusCode());
+            System.out.println("Response headers: " + response.headers().map());
+            System.out.println("Response body: " + response.body());
+
+            boolean success = response.statusCode() == 200 || response.statusCode() == 204;
+
+            if (success) {
+                // Check if we got the updated data back
+                if (response.statusCode() == 200 && !response.body().isEmpty()) {
+                    System.out.println("✓ Update confirmed - returned data: " + response.body());
+
+                    // Verify the returned data contains our update
+                    if (response.body().contains("\"nama_profil\"")) {
+                        try {
+                            Type listType = new TypeToken<List<Map<String, Object>>>(){}.getType();
+                            List<Map<String, Object>> updatedRecords = gson.fromJson(response.body(), listType);
+                            if (!updatedRecords.isEmpty()) {
+                                Map<String, Object> updatedRecord = updatedRecords.get(0);
+                                System.out.println("Updated record: " + updatedRecord);
+
+                                // Check if our update was actually applied
+                                for (String key : dataToUpdate.keySet()) {
+                                    Object expectedValue = dataToUpdate.get(key);
+                                    Object actualValue = updatedRecord.get(key);
+                                    System.out.println("Field '" + key + "': expected=" + expectedValue + ", actual=" + actualValue);
+
+                                    if (!expectedValue.equals(actualValue)) {
+                                        System.err.println("⚠ WARNING: Field '" + key + "' was not updated correctly!");
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Error parsing update response: " + e.getMessage());
+                        }
+                    }
+                }
+            } else {
+                System.err.println("Update failed with status: " + response.statusCode());
+                System.err.println("Response body: " + response.body());
+
+                // Check for specific error messages
+                if (response.body().contains("permission denied") || response.body().contains("RLS")) {
+                    System.err.println("⚠ Possible Row Level Security (RLS) policy blocking the update");
+                }
+                if (response.body().contains("violates")) {
+                    System.err.println("⚠ Possible database constraint violation");
+                }
+            }
+
+            return success;
         } catch (Exception e) {
+            System.err.println("Exception in updateUser: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
+    }
+
+    // Improved fetchUserById method
+    public String fetchUserById(String userId) {
+        try {
+            if (userId == null || userId.trim().isEmpty()) {
+                System.err.println("Invalid user ID provided to fetchUserById");
+                return null;
+            }
+
+            // Build URI without cache-busting parameters that confuse PostgREST
+            String uri = SUPABASE_URL + "/rest/v1/users?id=eq." + userId +
+                    "&select=username,nama_profil,password_hash";
+
+            System.out.println("Fetch URI: " + uri);
+
+            // Use headers for cache-busting instead of URL parameters
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_SERVICE_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_SERVICE_KEY)
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    .header("Pragma", "no-cache")
+                    .header("Expires", "0")
+                    .header("If-None-Match", "*") // Prevent conditional requests
+                    .header("X-Requested-At", String.valueOf(System.currentTimeMillis())) // Custom timestamp header
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Fetch response status: " + response.statusCode());
+            System.out.println("Fetch response body: " + response.body());
+
+            if (response.statusCode() == 200) {
+                String responseBody = response.body();
+
+                if (responseBody != null && responseBody.startsWith("[")) {
+                    Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
+                    List<Map<String, Object>> userList = gson.fromJson(responseBody, type);
+
+                    if (userList != null && !userList.isEmpty()) {
+                        Map<String, Object> userData = userList.get(0);
+                        System.out.println("User data retrieved: " + userData.keySet());
+                        return gson.toJson(userData);
+                    } else {
+                        System.err.println("No user found with ID: " + userId);
+                        return null;
+                    }
+                } else {
+                    System.err.println("Unexpected response format: " + responseBody);
+                    return null;
+                }
+            } else {
+                System.err.println("Fetch failed with status: " + response.statusCode());
+                System.err.println("Error response: " + response.body());
+                return null;
+            }
+        } catch (Exception e) {
+            System.err.println("Exception in fetchUserById: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // Optional: Add a method to test database connectivity
+    public boolean testDatabaseConnection() {
+        try {
+            String uri = SUPABASE_URL + "/rest/v1/users?limit=1";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_SERVICE_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_SERVICE_KEY)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            boolean connected = response.statusCode() == 200;
+            System.out.println("Database connection test: " + (connected ? "SUCCESS" : "FAILED"));
+
+            return connected;
+        } catch (Exception e) {
+            System.err.println("Database connection test failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Optional: Add a method to validate user session
+    public boolean validateUserSession(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return false;
+        }
+
+        String userData = fetchUserById(userId);
+        return userData != null;
+    }
+
+    // Enhanced method to verify update with multiple strategies
+    public boolean verifyUpdateWithRetry(String userId, Map<String, Object> expectedData, int maxRetries) {
+        System.out.println("Starting update verification for user: " + userId);
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                // Progressive delay: 1s, 2s, 3s, etc.
+                Thread.sleep(attempt * 1000);
+
+                System.out.println("Verification attempt " + attempt + "/" + maxRetries);
+
+                String userJson = fetchUserById(userId);
+                if (userJson != null) {
+                    Type type = new TypeToken<Map<String, String>>(){}.getType();
+                    Map<String, String> actualData = gson.fromJson(userJson, type);
+
+                    boolean allMatched = true;
+                    for (String key : expectedData.keySet()) {
+                        String expectedValue = String.valueOf(expectedData.get(key));
+                        String actualValue = actualData.get(key);
+
+                        System.out.println("Checking " + key + ": expected='" + expectedValue + "', actual='" + actualValue + "'");
+
+                        if (!expectedValue.equals(actualValue)) {
+                            System.out.println("❌ Mismatch for " + key);
+                            allMatched = false;
+                        } else {
+                            System.out.println("✅ Match for " + key);
+                        }
+                    }
+
+                    if (allMatched) {
+                        System.out.println("✅ All data verified successfully on attempt " + attempt);
+                        return true;
+                    }
+                } else {
+                    System.err.println("❌ Failed to fetch user data on attempt " + attempt);
+                }
+
+            } catch (InterruptedException e) {
+                System.err.println("Verification interrupted: " + e.getMessage());
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+
+        System.err.println("❌ Verification failed after " + maxRetries + " attempts");
+        return false;
+    }
+
+    // Method to check database permissions
+    public boolean testUpdatePermissions(String userId) {
+        try {
+            System.out.println("Testing update permissions for user: " + userId);
+
+            // Try a no-op update to test permissions
+            Map<String, Object> testData = new HashMap<>();
+            testData.put("nama_profil", "PERMISSION_TEST");
+
+            String jsonPayload = gson.toJson(testData);
+            String uri = SUPABASE_URL + "/rest/v1/users?id=eq." + userId;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_SERVICE_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_SERVICE_KEY)
+                    .header("Content-Type", "application/json")
+                    .header("Prefer", "return=representation")
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Permission test response: " + response.statusCode());
+            System.out.println("Permission test body: " + response.body());
+
+            if (response.statusCode() == 200 || response.statusCode() == 204) {
+                System.out.println("✅ Update permissions OK");
+
+                // Revert the test change
+                String originalJson = fetchUserById(userId);
+                if (originalJson != null) {
+                    Type type = new TypeToken<Map<String, String>>(){}.getType();
+                    Map<String, String> originalData = gson.fromJson(originalJson, type);
+                    String originalName = originalData.get("nama_profil");
+
+                    if (!"PERMISSION_TEST".equals(originalName)) {
+                        System.out.println("⚠ Permission test didn't actually update the database");
+                        return false;
+                    } else {
+                        System.out.println("✅ Permission test confirmed - database can be updated");
+                        return true;
+                    }
+                }
+            } else {
+                System.err.println("❌ Update permissions denied");
+                return false;
+            }
+
+        } catch (Exception e) {
+            System.err.println("Permission test failed: " + e.getMessage());
+            return false;
+        }
+
+        return false;
     }
 
     public String getKategoriIdByName(String userId, String kategoriNama) {
