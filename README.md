@@ -30,6 +30,7 @@
 1. **JavaFX**: untuk antarmuka aplikasi semata
 2. **Java HTTP Client** dan **Gson**: Menghubungkan aplikasi ke database dan mengolah data
 3. **jBcrypt**: Hashing password sebelum disimpan
+4. **Postgre**: untuk database yang digunakan aplikasi
 
 ---
 
