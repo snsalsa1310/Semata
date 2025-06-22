@@ -45,6 +45,8 @@ public class HutangController {
     private TableColumn<UtangModel, String> waktuDibuatColumn;
     @FXML
     private TableColumn<UtangModel, Void> aksiColumn;
+    @FXML
+    private SidebarController sidebarController;
 
     private final Database databaseService = new Database();
     private final Gson gson = new Gson();
@@ -53,6 +55,7 @@ public class HutangController {
     // [PERBAIKAN 1] Menambahkan metode initialize
     @FXML
     public void initialize() {
+        sidebarController.setActiveButton("utang");
         setupTableColumns();
         loadUtangData();
     }

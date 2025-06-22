@@ -10,10 +10,10 @@
             prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.uaslabpbo.controller.HutangController">
     <left>
-        <fx:include source="sidebar.fxml"/>
+        <fx:include fx:id="sidebar" source="sidebar.fxml" />
     </left>
     <center>
-        <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #E0F2F7; -fx-padding: 20px;">
+        <VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: #E0F2F7; -fx-padding: 20px;">
             <children>
                 <ImageView fitHeight="76.0" fitWidth="146.0" pickOnBounds="true" preserveRatio="true">
                     <image>

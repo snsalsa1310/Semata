@@ -25,6 +25,8 @@ public class ProfilController {
     @FXML private PasswordField ubahPasswordField;
     @FXML private Button simpanButton;
     @FXML private Button batalButton;
+    @FXML
+    private SidebarController sidebarController;
 
     private final Database databaseService = new Database();
     private final Gson gson = new Gson();
@@ -33,6 +35,7 @@ public class ProfilController {
     @FXML
     public void initialize() {
         // Nonaktifkan field username karena tidak bisa diubah
+        sidebarController.setActiveButton("profil");
         usernameField.setDisable(true);
         loadUserData();
     }

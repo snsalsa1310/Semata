@@ -35,6 +35,8 @@ public class TabunganController {
     private VBox tabunganListContainer;
     @FXML
     private Label totalTabunganLabel;
+    @FXML
+    private SidebarController sidebarController;
 
     private final Database databaseService = new Database();
     private final Gson gson = new Gson();
@@ -42,6 +44,7 @@ public class TabunganController {
 
     @FXML
     public void initialize() {
+        sidebarController.setActiveButton("tabungan");
         loadData();
     }
 

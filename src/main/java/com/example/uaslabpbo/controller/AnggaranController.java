@@ -42,6 +42,8 @@ public class AnggaranController {
     private Button sisaSaldo;
     @FXML
     private VBox ringkasanContainer;
+    @FXML
+    private SidebarController sidebarController;
     //</editor-fold>
 
     private final Database databaseService = new Database();
@@ -50,6 +52,7 @@ public class AnggaranController {
 
     @FXML
     public void initialize() {
+        sidebarController.setActiveButton("anggaran");
         loadData();
     }
 

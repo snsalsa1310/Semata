@@ -16,7 +16,7 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.uaslabpbo.controller.TabunganController">
     <left>
-        <fx:include source="sidebar.fxml" />
+        <fx:include fx:id="sidebar" source="sidebar.fxml" />
     </left>
     <center>
         <VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-padding: 20px;">

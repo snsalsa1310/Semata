@@ -17,12 +17,18 @@ import java.util.Objects;
 
 public class SidebarController {
 
+    //<editor-fold desc="FXML Fields">
     @FXML private Label namaProfilLabel;
     @FXML private Button anggaranButton;
     @FXML private Button utangButton;
     @FXML private Button tabunganButton;
     @FXML private Button profilButton;
     @FXML private Button keluarButton;
+    //</editor-fold>
+
+    // Definisikan style di satu tempat agar mudah diubah
+    private final String STYLE_ACTIVE = "-fx-background-color: #3873D9; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;";
+    private final String STYLE_INACTIVE = "-fx-background-color: transparent; -fx-text-fill: #d1eaff; -fx-font-size: 20px; -fx-alignment: CENTER_LEFT; -fx-padding: 10px 20px;";
 
     @FXML
     public void initialize() {
@@ -30,10 +36,38 @@ public class SidebarController {
         if (namaProfil != null && !namaProfil.isEmpty()) {
             namaProfilLabel.setText("Halo, " + namaProfil);
         }
-        // Logika untuk menonaktifkan atau mengubah style tombol halaman saat ini bisa ditambahkan di sini
     }
 
-    // Metode navigasi dipindahkan ke sini
+    /**
+     * Metode publik yang dipanggil oleh controller halaman utama
+     * untuk mengatur tombol mana yang aktif.
+     * @param pageName Nama halaman saat ini (misal: "anggaran", "tabungan").
+     */
+    public void setActiveButton(String pageName) {
+        // 1. Reset semua tombol ke style tidak aktif
+        anggaranButton.setStyle(STYLE_INACTIVE);
+        utangButton.setStyle(STYLE_INACTIVE);
+        tabunganButton.setStyle(STYLE_INACTIVE);
+        profilButton.setStyle(STYLE_INACTIVE);
+
+        // 2. Atur style aktif untuk tombol yang sesuai
+        switch (pageName.toLowerCase()) {
+            case "anggaran":
+                anggaranButton.setStyle(STYLE_ACTIVE);
+                break;
+            case "utang":
+                utangButton.setStyle(STYLE_ACTIVE);
+                break;
+            case "tabungan":
+                tabunganButton.setStyle(STYLE_ACTIVE);
+                break;
+            case "profil":
+                profilButton.setStyle(STYLE_ACTIVE);
+                break;
+        }
+    }
+
+    //<editor-fold desc="Navigation Methods">
     @FXML private void goToAnggaran(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/anggaran.fxml", "Anggaran"); }
     @FXML private void goToHutang(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/utang.fxml", "Utang"); }
     @FXML private void goToTabungan(ActionEvent event) { navigateTo(event, "/com/example/uaslabpbo/tabungan.fxml", "Tabungan"); }
@@ -65,4 +99,5 @@ public class SidebarController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    //</editor-fold>
 }
