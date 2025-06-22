@@ -505,13 +505,43 @@ public class Database {
         }
     }
 
-    public String fetchAllHutang(String userId) {
+    /**
+     * Mengambil semua data utang untuk ditampilkan di tabel.
+     * @param userId ID pengguna yang sedang login.
+     * @return JSON string berisi daftar lengkap utang.
+     */
+    public String fetchAllHutangForTable(String userId) {
         try {
             String uri = SUPABASE_URL + "/rest/v1/utang?id_user=eq." + userId + "&select=*&order=waktu_dibuat.desc";
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(uri))
                     .header("apikey", SUPABASE_ANON_KEY)
                     .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    .GET().build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return (response.statusCode() == 200) ? response.body() : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Mengambil data utang yang masih aktif untuk ringkasan.
+     * Metode ini menyertakan header cache-control untuk memastikan data selalu baru.
+     * @param userId ID pengguna yang sedang login.
+     * @return JSON string berisi daftar utang yang aktif.
+     */
+    public String fetchActiveHutangForSummary(String userId) {
+        try {
+            // Mengambil semua utang yang BELUM lunas
+            String uri = SUPABASE_URL + "/rest/v1/utang?id_user=eq." + userId + "&status_lunas=is.false&select=total";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("apikey", SUPABASE_ANON_KEY)
+                    .header("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                    // [PENTING] Header untuk mencegah caching
+                    .header("Cache-Control", "no-cache")
                     .GET().build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             return (response.statusCode() == 200) ? response.body() : null;

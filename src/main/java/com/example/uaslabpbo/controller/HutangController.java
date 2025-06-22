@@ -105,7 +105,7 @@ public class HutangController {
         }
 
         new Thread(() -> {
-            String jsonResponse = databaseService.fetchAllHutang(userId);
+            String jsonResponse = databaseService.fetchAllHutangForTable(userId);
             if (jsonResponse != null && !jsonResponse.isEmpty()) {
                 Type type = new TypeToken<List<Map<String, Object>>>() {
                 }.getType();

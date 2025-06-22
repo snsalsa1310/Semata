@@ -71,7 +71,7 @@ public class AnggaranController {
             // Ambil semua data yang relevan secara bersamaan
             String kategoriJson = databaseService.fetchAllKategori(userId);
             String transaksiJson = databaseService.fetchAllTransaksi(userId);
-            String hutangJson = databaseService.fetchAllHutang(userId);
+            String hutangJson = databaseService.fetchActiveHutangForSummary(userId);
 
             // Simpan kategori dalam cache untuk akses cepat
             kategoriCache = new HashMap<>();
